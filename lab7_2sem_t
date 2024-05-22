@@ -1,0 +1,36 @@
+#include <iostream>
+#include <thread>
+#include <random>
+
+
+
+
+void sortPus(const std::string& threadName, std::vector<float>& subarray, int start, int end) {
+    for (int i = start; i < end - 1; ++i) {
+        for (int j = end - 1; j > i; --j) {
+            if (subarray[j] < subarray[j - 1]) {
+                std::swap(subarray[j], subarray[j - 1]);
+            }
+        }
+        std::cout << threadName << ": ";
+        for (int k = start; k < end; ++k) {
+            std::cout << subarray[k] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+int main() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dis(0.0f, 20.0f);
+    std::vector<float> array(20);
+    for (float& element : array) {
+        element = dis(gen);
+    }
+    std::thread thread1(sortPus, "thread1", ref(array), 0, 10);
+    std::thread thread2(sortPus, "thread2", ref(array), 10, 20);
+    thread1.join();
+    thread2.join();
+    sortPus("thread3", ref(array), 0, 20);
+}
