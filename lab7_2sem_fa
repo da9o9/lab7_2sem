@@ -1,0 +1,38 @@
+#include <iostream>
+#include <future>
+#include <thread>
+#include <random>
+
+
+void sortPus(const std::string& threadName, std::vector<float>& subarray, int start, int end) {
+    for (int i = start; i < end - 1; ++i) {
+        for (int j = end - 1; j > i; --j) {
+            if (subarray[j] < subarray[j - 1]) {
+                std::swap(subarray[j], subarray[j - 1]);
+            }
+        }
+        std::cout << threadName << ": ";
+        for (int k = start; k < end; ++k) {
+            std::cout << subarray[k] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+int main() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dis(0.0f, 20.0f);
+    std::vector<float> array(20);
+    for (float& element : array) {
+        element = dis(gen);
+    }
+    std::future<void> thread1Future = async(sortPus, "thread1", ref(array), 0, 10);
+    std::future<void> thread2Future = async(sortPus, "thread2", ref(array), 10, 20);
+    thread1Future.wait();
+    thread2Future.wait();
+    sortPus("thread3", ref(array), 0, 20);
+    std::cout << "Главный поток: все потоки закончили сортировку массива." << std::endl;
+    
+    return 0;
+}
